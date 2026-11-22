@@ -1,0 +1,24 @@
+{
+	"name": "EVENTTRIGGER_MANUAL",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "PL_EVENTMANUALFILES",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "BlobEventsTrigger",
+		"typeProperties": {
+			"blobPathBeginsWith": "/eventcontainer/blobs/",
+			"ignoreEmptyBlobs": true,
+			"scope": "/subscriptions/4bbd271e-51ee-4137-9aae-cd5b425f8acf/resourceGroups/rgdevcheronproject079/providers/Microsoft.Storage/storageAccounts/adlsdevcsvtrigger025",
+			"events": [
+				"Microsoft.Storage.BlobCreated"
+			]
+		}
+	}
+}
