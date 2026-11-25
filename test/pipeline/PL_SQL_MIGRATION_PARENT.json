@@ -4,6 +4,7 @@
 		"activities": [
 			{
 				"name": "LKUP_SQLTABLE_WATRMRK_DW",
+				"description": "SELECT\n    TableSchema,\n    TableName,\n    WatermarkColumn,\n    LastLoadValue\nFROM dbo.ADF_Watermark_Table;",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -23,7 +24,11 @@
 					},
 					"dataset": {
 						"referenceName": "DS_LKUP_MAX_VALUE",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"Schema_Name": "dbo",
+							"Table_Name": "ADF_Watermark_Table"
+						}
 					},
 					"firstRowOnly": false
 				}
