@@ -382,6 +382,204 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/PL_SQL_MIGRATION_CHILD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LKUP_MAX_VALUE",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": {
+									"value": "@concat(\n'SELECT MAX(',pipeline().parameters.WatermarkColumn,\n') AS MaxValue FROM ',\npipeline().parameters.TableSchema,'.',\npipeline().parameters.TableName\n)",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "DS_LKUP_MAX_VALUE",
+								"type": "DatasetReference",
+								"parameters": {
+									"Schema_Name": {
+										"value": "@pipeline().parameters.TableSchema",
+										"type": "Expression"
+									},
+									"Table_Name": "@pipeline().parameters.TableName"
+								}
+							},
+							"firstRowOnly": true
+						}
+					},
+					{
+						"name": "IF_CHECK_NEW_RECORDS",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "LKUP_MAX_VALUE",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@or(\n    equals(pipeline().parameters.LastLoadValue, null),\n    greater(\n        int(activity('LKUP_MAX_VALUE').output.firstRow.MaxValue),\n        int(pipeline().parameters.LastLoadValue)\n    )\n)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "CPY_SQL_TO_ADLS",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "SqlServerSource",
+											"sqlReaderQuery": {
+												"value": "@if(\n    equals(pipeline().parameters.LastLoadValue, null),\n    concat(\n        'SELECT * FROM ',\n        pipeline().parameters.TableSchema,\n        '.',\n        pipeline().parameters.TableName\n    ),\n    concat(\n        'SELECT * FROM ',\n        pipeline().parameters.TableSchema,\n        '.',\n        pipeline().parameters.TableName,\n        ' WHERE ',\n        pipeline().parameters.WatermarkColumn,\n        ' > ',\n        pipeline().parameters.LastLoadValue\n    )\n)",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "ParquetSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "ParquetWriteSettings"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "DS_LKUP_MAX_VALUE",
+											"type": "DatasetReference",
+											"parameters": {
+												"Schema_Name": "@pipeline().parameters.TableSchema",
+												"Table_Name": "@pipeline().parameters.TableName"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "DS_ADLS_SINK",
+											"type": "DatasetReference",
+											"parameters": {
+												"Table_Name": "@pipeline().parameters.TableName",
+												"Folder_Path": "@concat(pipeline().parameters.TableName,'/',formatDateTime(utcNow(),'yyyy/MM/dd'))"
+											}
+										}
+									]
+								},
+								{
+									"name": "SP_UPDATE_WATERMARK",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "CPY_SQL_TO_ADLS",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[UpdateWatermark]",
+										"storedProcedureParameters": {
+											"TableName": {
+												"value": "@pipeline().parameters.TableSchema",
+												"type": "String"
+											},
+											"TableSchema": {
+												"value": {
+													"value": "@pipeline().parameters.TableName",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"WatermarkColumn": {
+												"value": {
+													"value": "@pipeline().parameters.WatermarkColumn",
+													"type": "Expression"
+												},
+												"type": "String"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_SQLSERVER_MIGRATION",
+										"type": "LinkedServiceReference"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"TableSchema": {
+						"type": "string"
+					},
+					"TableName": {
+						"type": "string"
+					},
+					"WatermarkColumn": {
+						"type": "string"
+					},
+					"LastLoadValue": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_LKUP_MAX_VALUE')]",
+				"[concat(variables('factoryId'), '/datasets/DS_ADLS_SINK')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_SQLSERVER_MIGRATION')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/PL_SQL_MIGRATION_PARENT')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -417,6 +615,53 @@
 							},
 							"firstRowOnly": false
 						}
+					},
+					{
+						"name": "FE_PROCESS_TABLES",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LKUP_SQLTABLE_WATRMRK_DW",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LKUP_SQLTABLE_WATRMRK_DW').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "EXEC_PL_SQL_MIGRATION_CHILD",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"policy": {
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "PL_SQL_MIGRATION_CHILD",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"TableSchema": {
+												"value": "@item().TableSchema",
+												"type": "Expression"
+											},
+											"TableName": "@item().TableName",
+											"WatermarkColumn": "@item().WatermarkColumn",
+											"LastLoadValue": "@item().LastLoadValue"
+										}
+									}
+								}
+							]
+						}
 					}
 				],
 				"policy": {
@@ -425,7 +670,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DS_LKUP_MAX_VALUE')]"
+				"[concat(variables('factoryId'), '/datasets/DS_LKUP_MAX_VALUE')]",
+				"[concat(variables('factoryId'), '/pipelines/PL_SQL_MIGRATION_CHILD')]"
 			]
 		},
 		{
