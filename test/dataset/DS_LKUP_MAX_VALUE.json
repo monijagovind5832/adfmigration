@@ -1,0 +1,24 @@
+{
+	"name": "DS_LKUP_MAX_VALUE",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SQLSERVER_MIGRATION",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Schema_Name": {
+				"type": "string"
+			},
+			"Table_Name": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "@dataset().Schema_Name",
+			"table": "@dataset().Table_Name"
+		}
+	}
+}
