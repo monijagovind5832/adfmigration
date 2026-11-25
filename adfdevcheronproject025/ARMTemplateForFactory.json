@@ -31,6 +31,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'DS_SQLSERVER_DB'"
 		},
+		"LS_ADLS_SQLMIGRATION_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'LS_ADLS_SQLMIGRATION'"
+		},
 		"LS_BULK_PARQUET_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_BULK_PARQUET'"
@@ -54,6 +58,10 @@
 		"LS_SQLSERVER_DB_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_SQLSERVER_DB'"
+		},
+		"LS_SQLSERVER_MIGRATION_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_SQLSERVER_MIGRATION'"
 		},
 		"LS_SQL_ADLS1_accountKey": {
 			"type": "secureString",
@@ -103,6 +111,10 @@
 			"type": "string",
 			"defaultValue": "monija"
 		},
+		"LS_ADLS_SQLMIGRATION_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://sqlmigration025.dfs.core.windows.net/"
+		},
 		"LS_BULK_PARQUET_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adlsdevcsvouttrigger025.dfs.core.windows.net/"
@@ -132,6 +144,18 @@
 			"defaultValue": "AdventureWorks2025"
 		},
 		"LS_SQLSERVER_DB_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "monija"
+		},
+		"LS_SQLSERVER_MIGRATION_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": ".\\SQLEXPRESS02"
+		},
+		"LS_SQLSERVER_MIGRATION_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "sqlmigration"
+		},
+		"LS_SQLSERVER_MIGRATION_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "monija"
 		},
@@ -418,6 +442,41 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_LKUP_MAX_VALUE')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_SQLSERVER_MIGRATION",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Schema_Name": {
+						"type": "string"
+					},
+					"Table_Name": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().Schema_Name",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().Table_Name",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_SQLSERVER_MIGRATION')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_MANUALFILE_PARQUET')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -630,6 +689,23 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_ADLS_SQLMIGRATION')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_ADLS_SQLMIGRATION_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('LS_ADLS_SQLMIGRATION_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_BULK_PARQUET')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -731,6 +807,34 @@
 					"password": {
 						"type": "SecureString",
 						"value": "[parameters('LS_SQLSERVER_DB_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "integrationRuntime1",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_SQLSERVER_MIGRATION')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"server": "[parameters('LS_SQLSERVER_MIGRATION_properties_typeProperties_server')]",
+					"database": "[parameters('LS_SQLSERVER_MIGRATION_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": true,
+					"authenticationType": "SQL",
+					"userName": "[parameters('LS_SQLSERVER_MIGRATION_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_SQLSERVER_MIGRATION_password')]"
 					}
 				},
 				"connectVia": {

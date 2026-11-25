@@ -23,6 +23,9 @@
 		"DS_SQLSERVER_DB_password": {
 			"value": ""
 		},
+		"LS_ADLS_SQLMIGRATION_accountKey": {
+			"value": ""
+		},
 		"LS_BULK_PARQUET_accountKey": {
 			"value": ""
 		},
@@ -39,6 +42,9 @@
 			"value": ""
 		},
 		"LS_SQLSERVER_DB_password": {
+			"value": ""
+		},
+		"LS_SQLSERVER_MIGRATION_password": {
 			"value": ""
 		},
 		"LS_SQL_ADLS1_accountKey": {
@@ -77,6 +83,9 @@
 		"DS_SQLSERVER_DB_properties_typeProperties_userName": {
 			"value": "monija"
 		},
+		"LS_ADLS_SQLMIGRATION_properties_typeProperties_url": {
+			"value": "https://sqlmigration025.dfs.core.windows.net/"
+		},
 		"LS_BULK_PARQUET_properties_typeProperties_url": {
 			"value": "https://adlsdevcsvouttrigger025.dfs.core.windows.net/"
 		},
@@ -99,6 +108,15 @@
 			"value": "AdventureWorks2025"
 		},
 		"LS_SQLSERVER_DB_properties_typeProperties_userName": {
+			"value": "monija"
+		},
+		"LS_SQLSERVER_MIGRATION_properties_typeProperties_server": {
+			"value": ".\\SQLEXPRESS02"
+		},
+		"LS_SQLSERVER_MIGRATION_properties_typeProperties_database": {
+			"value": "sqlmigration"
+		},
+		"LS_SQLSERVER_MIGRATION_properties_typeProperties_userName": {
 			"value": "monija"
 		},
 		"LS_SQL_ADLS1_properties_typeProperties_url": {

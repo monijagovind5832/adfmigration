@@ -31,6 +31,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'DS_SQLSERVER_DB'"
 		},
+		"LS_ADLS_SQLMIGRATION_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'LS_ADLS_SQLMIGRATION'"
+		},
 		"LS_BULK_PARQUET_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'LS_BULK_PARQUET'"
@@ -54,6 +58,10 @@
 		"LS_SQLSERVER_DB_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_SQLSERVER_DB'"
+		},
+		"LS_SQLSERVER_MIGRATION_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_SQLSERVER_MIGRATION'"
 		},
 		"LS_SQL_ADLS1_accountKey": {
 			"type": "secureString",
@@ -103,6 +111,10 @@
 			"type": "string",
 			"defaultValue": "monija"
 		},
+		"LS_ADLS_SQLMIGRATION_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://sqlmigration025.dfs.core.windows.net/"
+		},
 		"LS_BULK_PARQUET_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adlsdevcsvouttrigger025.dfs.core.windows.net/"
@@ -132,6 +144,18 @@
 			"defaultValue": "AdventureWorks2025"
 		},
 		"LS_SQLSERVER_DB_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "monija"
+		},
+		"LS_SQLSERVER_MIGRATION_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": ".\\SQLEXPRESS02"
+		},
+		"LS_SQLSERVER_MIGRATION_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "sqlmigration"
+		},
+		"LS_SQLSERVER_MIGRATION_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "monija"
 		},
@@ -186,6 +210,9 @@
 					"DS_EVENTFILES_accountKey": {
 						"value": "[parameters('DS_EVENTFILES_accountKey')]"
 					},
+					"LS_ADLS_SQLMIGRATION_accountKey": {
+						"value": "[parameters('LS_ADLS_SQLMIGRATION_accountKey')]"
+					},
 					"LS_BULK_PARQUET_accountKey": {
 						"value": "[parameters('LS_BULK_PARQUET_accountKey')]"
 					},
@@ -213,9 +240,6 @@
 					"DS_SQLSERVER_DB_password": {
 						"value": "[parameters('DS_SQLSERVER_DB_password')]"
 					},
-					"LS_SQLSERVER_DB_password": {
-						"value": "[parameters('LS_SQLSERVER_DB_password')]"
-					},
 					"AzureDataLakeStorage1_properties_typeProperties_url": {
 						"value": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]"
 					},
@@ -227,6 +251,9 @@
 					},
 					"DS_EVENTFILES_properties_typeProperties_url": {
 						"value": "[parameters('DS_EVENTFILES_properties_typeProperties_url')]"
+					},
+					"LS_ADLS_SQLMIGRATION_properties_typeProperties_url": {
+						"value": "[parameters('LS_ADLS_SQLMIGRATION_properties_typeProperties_url')]"
 					},
 					"LS_BULK_PARQUET_properties_typeProperties_url": {
 						"value": "[parameters('LS_BULK_PARQUET_properties_typeProperties_url')]"
@@ -266,15 +293,6 @@
 					},
 					"DS_SQLSERVER_DB_properties_typeProperties_userName": {
 						"value": "[parameters('DS_SQLSERVER_DB_properties_typeProperties_userName')]"
-					},
-					"LS_SQLSERVER_DB_properties_typeProperties_server": {
-						"value": "[parameters('LS_SQLSERVER_DB_properties_typeProperties_server')]"
-					},
-					"LS_SQLSERVER_DB_properties_typeProperties_database": {
-						"value": "[parameters('LS_SQLSERVER_DB_properties_typeProperties_database')]"
-					},
-					"LS_SQLSERVER_DB_properties_typeProperties_userName": {
-						"value": "[parameters('LS_SQLSERVER_DB_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -293,6 +311,30 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"LS_SQLSERVER_DB_password": {
+						"value": "[parameters('LS_SQLSERVER_DB_password')]"
+					},
+					"LS_SQLSERVER_MIGRATION_password": {
+						"value": "[parameters('LS_SQLSERVER_MIGRATION_password')]"
+					},
+					"LS_SQLSERVER_DB_properties_typeProperties_server": {
+						"value": "[parameters('LS_SQLSERVER_DB_properties_typeProperties_server')]"
+					},
+					"LS_SQLSERVER_DB_properties_typeProperties_database": {
+						"value": "[parameters('LS_SQLSERVER_DB_properties_typeProperties_database')]"
+					},
+					"LS_SQLSERVER_DB_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SQLSERVER_DB_properties_typeProperties_userName')]"
+					},
+					"LS_SQLSERVER_MIGRATION_properties_typeProperties_server": {
+						"value": "[parameters('LS_SQLSERVER_MIGRATION_properties_typeProperties_server')]"
+					},
+					"LS_SQLSERVER_MIGRATION_properties_typeProperties_database": {
+						"value": "[parameters('LS_SQLSERVER_MIGRATION_properties_typeProperties_database')]"
+					},
+					"LS_SQLSERVER_MIGRATION_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SQLSERVER_MIGRATION_properties_typeProperties_userName')]"
 					},
 					"EVENTTRIGGER_MANUAL_properties_typeProperties_scope": {
 						"value": "[parameters('EVENTTRIGGER_MANUAL_properties_typeProperties_scope')]"
