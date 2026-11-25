@@ -50,7 +50,34 @@
 						"value": "@activity('LKUP_SQLTABLE_WATRMRK_DW').output.value",
 						"type": "Expression"
 					},
-					"isSequential": true
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "EXEC_PL_SQL_MIGRATION_CHILD",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_SQL_MIGRATION_CHILD",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"TableSchema": {
+										"value": "@item().TableSchema",
+										"type": "Expression"
+									},
+									"TableName": "@item().TableName",
+									"WatermarkColumn": "@item().WatermarkColumn",
+									"LastLoadValue": "@item().LastLoadValue"
+								}
+							}
+						}
+					]
 				}
 			}
 		],
