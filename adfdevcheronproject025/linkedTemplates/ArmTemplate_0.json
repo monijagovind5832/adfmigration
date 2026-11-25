@@ -59,10 +59,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'DS_SQLSERVER'"
 		},
-		"DS_SQLSERVER_DB_password": {
-			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'DS_SQLSERVER_DB'"
-		},
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adlsdevsourse025.dfs.core.windows.net/"
@@ -120,18 +116,6 @@
 			"defaultValue": "AdventureWorks2025"
 		},
 		"DS_SQLSERVER_properties_typeProperties_userName": {
-			"type": "string",
-			"defaultValue": "monija"
-		},
-		"DS_SQLSERVER_DB_properties_typeProperties_server": {
-			"type": "string",
-			"defaultValue": ".\\SQLEXPRESS02"
-		},
-		"DS_SQLSERVER_DB_properties_typeProperties_database": {
-			"type": "string",
-			"defaultValue": "AdventureWorks2025"
-		},
-		"DS_SQLSERVER_DB_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "monija"
 		}
@@ -355,6 +339,46 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DS_ADLS_SINK')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_SQLMIGRATION",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Table_Name": {
+						"type": "string"
+					},
+					"Folder_Path": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat(dataset().Table_Name,'_',formatDateTime(utcNow(),'yyyyMMddHHmmss'),'.parquet')",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().Folder_Path",
+							"type": "Expression"
+						},
+						"fileSystem": "migrationdata"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_SQLMIGRATION')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/DS_BULK_PARQUET')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -519,34 +543,6 @@
 					"password": {
 						"type": "SecureString",
 						"value": "[parameters('DS_SQLSERVER_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "integrationRuntime1",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntime1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DS_SQLSERVER_DB')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"server": "[parameters('DS_SQLSERVER_DB_properties_typeProperties_server')]",
-					"database": "[parameters('DS_SQLSERVER_DB_properties_typeProperties_database')]",
-					"encrypt": "mandatory",
-					"trustServerCertificate": true,
-					"authenticationType": "SQL",
-					"userName": "[parameters('DS_SQLSERVER_DB_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('DS_SQLSERVER_DB_password')]"
 					}
 				},
 				"connectVia": {
