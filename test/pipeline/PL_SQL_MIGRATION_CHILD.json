@@ -71,7 +71,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlServerSource",
-									"sqlReaderQuery": "@if(\n    equals(pipeline().parameters.LastLoadValue, null),\n    concat(\n        'SELECT * FROM ',\n        pipeline().parameters.TableSchema,\n        '.',\n        pipeline().parameters.TableName\n    ),\n    concat(\n        'SELECT * FROM ',\n        pipeline().parameters.TableSchema,\n        '.',\n        pipeline().parameters.TableName,\n        ' WHERE ',\n        pipeline().parameters.WatermarkColumn,\n        ' > ',\n        pipeline().parameters.LastLoadValue\n    )\n)",
+									"sqlReaderQuery": {
+										"value": "@if(\n    equals(pipeline().parameters.LastLoadValue, null),\n    concat(\n        'SELECT * FROM ',\n        pipeline().parameters.TableSchema,\n        '.',\n        pipeline().parameters.TableName\n    ),\n    concat(\n        'SELECT * FROM ',\n        pipeline().parameters.TableSchema,\n        '.',\n        pipeline().parameters.TableName,\n        ' WHERE ',\n        pipeline().parameters.WatermarkColumn,\n        ' > ',\n        pipeline().parameters.LastLoadValue\n    )\n)",
+										"type": "Expression"
+									},
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
@@ -114,6 +117,53 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "SP_UPDATE_WATERMARK",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "CPY_SQL_TO_ADLS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[UpdateWatermark]",
+								"storedProcedureParameters": {
+									"TableName": {
+										"value": "@pipeline().parameters.TableSchema",
+										"type": "String"
+									},
+									"TableSchema": {
+										"value": {
+											"value": "@pipeline().parameters.TableName",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"WatermarkColumn": {
+										"value": {
+											"value": "@pipeline().parameters.WatermarkColumn",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_SQLSERVER_MIGRATION",
+								"type": "LinkedServiceReference"
+							}
 						}
 					]
 				}
